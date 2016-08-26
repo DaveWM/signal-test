@@ -20,7 +20,8 @@
                    8 "eighty"
                    9 "ninety"})
 
-(def teens-strings {1 "eleven"
+(def teens-strings {0 "ten"
+                    1 "eleven"
                     2 "twelve"
                     3 "thirteen"
                     4 "fourteen"
