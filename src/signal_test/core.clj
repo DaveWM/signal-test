@@ -37,39 +37,46 @@
   "returns x^n"
   (apply * (repeat n x)))
 
+(defn update-last [func coll]
+  (update (vec coll) (dec (count coll)) func))
+
 (defn split-number [n group-size]
-  "Splits a number into groups, with the given length. For example, (split-number 123456 3) returns (456 123). Returns an infinite seq"
+  "Splits a number into groups, with the given length. For example, (split-number 123456 3) returns (456 123)"
   (let [group-multiplier (pow 10 group-size)]
-    (map #(-> (quot n %)
-              (mod group-multiplier))
-         (iterate (partial * group-multiplier) 1))))
+    (->> (iterate (partial * group-multiplier) 1)
+         (take-while #(<= % n))
+         (map #(-> (quot n %)
+                   (mod group-multiplier))))))
 
 (defn group-to-vec [n]
   "Returns a vector representing a group of 3 or fewer numbers"
   (let [[singles tens hundreds] (split-number n 1)]
-    [(when (not (zero? hundreds))
+    [(when hundreds
        (str (get digit-strings hundreds) " hundred"))
      (when tens (get tens-strings tens))
      (let [numbers-map (if (= 1 tens) teens-strings digit-strings)]
        (get numbers-map singles))]))
 
-(defn group-vec-to-str [group]
+(defn group-vec-to-str [group unit]
   "Converts the vector representation of a group into a string"
   (let [[hundreds tens singles] group
-        add-and (and hundreds (or tens singles))]
-    (->> [hundreds (when add-and "and") tens singles]
+        hundreds-and (and hundreds (or tens singles))]
+    (->> [hundreds (when hundreds-and "and") tens singles unit]
          (remove nil?)
          (join " "))))
 
 (defn number-to-string [n]
   "Converts a positive integer into an english sentence"
-  (let [groups (split-number n 3)]
+  (let [groups (split-number n 3)
+        add-and (and (not= (count groups) 1)
+                     (> 100 (first groups) 0))]
     (->> (map
           (fn [group unit] [(group-to-vec group) unit])
           groups units)
          (filter (fn [[group-vec unit]] (some (complement nil?) group-vec)))
-         (map (fn [[group-vec unit]] (str (group-vec-to-str group-vec) (when unit (str " " unit)))))
+         (map (fn [[group-vec unit]] (group-vec-to-str group-vec unit)))
          reverse
+         (update-last #(if add-and (str "and " %) %))
          (join ", "))))
 
 
