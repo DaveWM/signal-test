@@ -55,8 +55,11 @@
 
 (defn group-vec-to-str [group]
   "Converts the vector representation of a group into a string"
-  (->> (remove nil? group)
-       (join " ")))
+  (let [[hundreds tens singles] group
+        add-and (and hundreds (or tens singles))]
+    (->> [hundreds (when add-and "and") tens singles]
+         (remove nil?)
+         (join " "))))
 
 (defn number-to-string [n]
   "Converts a positive integer into an english sentence"
