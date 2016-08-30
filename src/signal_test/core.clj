@@ -35,10 +35,11 @@
 (def units [nil "thousand" "million" "billion" "trillion" "quadrillion"])
 
 (defn pow [x n]
-  "returns x^n"
+  "returns x^n, where n is a positive integer"
   (apply * (repeat n x)))
 
 (defn update-last [func coll]
+  "updates the last element in a collection"
   (update (vec coll) (dec (count coll)) func))
 
 (defn split-number [n group-size]
@@ -50,7 +51,7 @@
                    (mod group-multiplier))))))
 
 (defn group-to-vec [n]
-  "Returns a vector representing a group of 3 or fewer numbers"
+  "Returns a vector representing a group of 3 or fewer numbers, in the format [hundreds tens (digit or special number, e.g. twelve)]"
   (let [[singles tens hundreds] (split-number n 1)]
     [(when hundreds
        (str (get digit-strings hundreds) " hundred"))
@@ -77,6 +78,7 @@
          (filter (fn [[group-vec unit]] (some (complement nil?) group-vec)))
          (map (fn [[group-vec unit]] (group-vec-to-str group-vec unit)))
          reverse
+         ; add "and" to last group iff it's less than 100 and there's more than 1 group
          (update-last #(if add-and (str "and " %) %))
          (join ", "))))
 (s/fdef number-to-string
