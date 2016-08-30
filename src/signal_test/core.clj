@@ -1,5 +1,6 @@
 (ns signal-test.core
-  (:require [clojure.string :refer [join]]))
+  (:require [clojure.string :refer [join]]
+            [clojure.spec :as s]))
 
 (def digit-strings {1 "one"
                     2 "two"
@@ -78,5 +79,8 @@
          reverse
          (update-last #(if add-and (str "and " %) %))
          (join ", "))))
+(s/fdef number-to-string
+        :args (s/cat :number (s/and int? #(> 100000000000000000 % 0)))
+        :ret (s/and string? (complement empty?)))
 
 
